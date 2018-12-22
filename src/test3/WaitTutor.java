@@ -37,8 +37,14 @@ public class WaitTutor {
             for (int i=0; i < 100; i++) {
                 System.out.println(threadName+":"+i); 
                 synchronized(monitor) {
-                    if (n == 1) t1Counter = i;
-                    if (n == 2) t2Counter = i;
+                    if (n == 1) {
+                        t1Counter = i;
+
+                    }
+                        if (n == 2) {
+                            t2Counter = i;
+
+                        }
 //                    if (n == 0) {
 //                        if (t1Counter == t2Counter && t1Counter % 10 == 0) {
 //                            System.err.println("COUNTER " + t1Counter + " = " + t2Counter);
@@ -71,7 +77,7 @@ public class WaitTutor {
                         e.printStackTrace(); 
                     }
                 }
-                Thread.yield(); 
+                Thread.yield();
             }
         }
     }
