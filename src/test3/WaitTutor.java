@@ -50,11 +50,12 @@ public class WaitTutor {
 //                            System.err.println("COUNTER " + t1Counter + " = " + t2Counter);
 //                        }
 //                    }
-                    monitor.notifyAll();
 
+                    monitor.notify();
                     try {
                         if (n == 1) {
                             if (t1Counter % 10 == 0 && t2Counter % 10 != 0){
+                                monitor.notifyAll();
                                 monitor.wait();
                             }
                             if (i > t2Counter) {
@@ -65,6 +66,7 @@ public class WaitTutor {
                         }
                         if (n == 2) {
                             if (t2Counter % 10 == 0 && t1Counter % 10 != 0){
+                                monitor.notifyAll();
                                 monitor.wait();
                             }
                             if (i > t1Counter) {
@@ -97,6 +99,7 @@ public class WaitTutor {
                         if (t1Counter == t2Counter && t1Counter % 10 == 0) {
                             System.err.println("COUNTER " + t1Counter + " = " + t2Counter);
                             try {
+                                monitor.notifyAll();
                                 monitor.wait();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
