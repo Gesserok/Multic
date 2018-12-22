@@ -1,6 +1,6 @@
-package test3; 
+package test3;  
 
-import org.junit.Test; 
+import org.junit.Test;
 
 /**
  * Как сделать так, чтобы потоки вызывались по очереди?
@@ -16,11 +16,11 @@ import org.junit.Test;
 
 
 public class WaitTutor {
-    int a;
-    Thread t1, t2, counterThread;
+    Thread t1, t2; 
     Object monitor = new Object(); 
     int runningThreadNumber = 1; 
-    int t1Counter = 0, t2Counter = 0; 
+    volatile int t1Counter = 0, t2Counter = 0;
+    private Thread counterThread; 
     //int maxCounter = 0; 
 
     class TestThread implements Runnable {
@@ -34,31 +34,35 @@ public class WaitTutor {
 
         @Override
         public void run() {
-
-            for (int i=0; i <  100; i++) {
-
-                System.out.println(threadName+":"+i);
+            for (int i=0; i < 100; i++) {
+                System.out.println(threadName+":"+i); 
                 synchronized(monitor) {
-                    if (n == 1) t1Counter = i; 
-                    if (n == 2) t2Counter = i; 
-                    monitor.notify(); 
-                    Thread.yield(); 
-//                    try {
+                    if (n == 1) t1Counter = i;
+                    if (n == 2) t2Counter = i;
+//                    if (n == 0) {
+//                        if (t1Counter == t2Counter && t1Counter % 10 == 0) {
+//                            System.err.println("COUNTER " + t1Counter + " = " + t2Counter);
+//                        }
+//                    }
+                    monitor.notifyAll();
+
+                    try {
                         if (n == 1) {
                             if (i > t2Counter) {
                                 System.out.println("t1 is ahead with i="+i+", wait for t2Counter="+t2Counter); 
-//                                monitor.wait();
+                                monitor.wait(); 
                             }
                         }
                         if (n == 2) {
                             if (i > t1Counter) {
                                 System.out.println("t2 is ahead with i="+i+", wait for t1Counter="+t1Counter); 
-//                                monitor.wait();
+                                monitor.wait(); 
                             }
                         }
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace(); 
+                    }
                 }
                 Thread.yield(); 
             }
@@ -67,42 +71,36 @@ public class WaitTutor {
 
     @Test
     public void testThread() {
-        t1 = new Thread(new TestThread("t1", 1)); 
-        t2 = new Thread(new TestThread("t2", 2));
-        counterThread = new Thread("Counter Thread"){
+        t1 = new Thread(new TestThread("t1", 1));
+        t2 = new Thread(new TestThread("t2", 2)); 
+        counterThread = new Thread(){
+
             @Override
             public void run() {
-                synchronized (monitor) {
-                    if (t1Counter > 0 && t1Counter % 10 == 0) {
-                        try {
-                            t1.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+
+                while(true) {
+                    synchronized (monitor) {
+
+                        if (t1Counter == t2Counter && t1Counter % 10 == 0) {
+                            System.err.println("COUNTER " + t1Counter + " = " + t2Counter);
+                            try {
+                                monitor.wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                    if (t2Counter > 0 && t2Counter % 10 == 0) {
-                        try {
-                            t2.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (t1Counter == t2Counter) {
-                        System.err.println(t1Counter + " = " + t2Counter);
-                        t1.run();
-                        t2.run();
                     }
                 }
             }
         };
-        counterThread.start();
+        counterThread.setDaemon(true);
         System.out.println("Starting threads");
+        counterThread.start(); 
         t1.start(); 
-        t2.start(); 
-
+        t2.start();
         System.out.println("Waiting for threads"); 
         try {
-            t1.join(); 
+            t1.join();
             t2.join(); 
         } catch (InterruptedException e) {
             e.printStackTrace(); 
