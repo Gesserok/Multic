@@ -67,7 +67,6 @@ public class WaitTutor {
                         }
                         if (n == 2) {
                             if (t2Counter % 10 == 0 && t1Counter % 10 != 0){
-                                monitor.notifyAll();
                                 monitor.wait();
                             }
                             if (i > t1Counter) {
@@ -80,7 +79,6 @@ public class WaitTutor {
                         e.printStackTrace(); 
                     }
 
-                    bool = true;
                 }
                 Thread.yield();
             }
