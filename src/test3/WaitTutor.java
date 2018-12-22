@@ -48,15 +48,22 @@ public class WaitTutor {
 
                     try {
                         if (n == 1) {
+                            if (t1Counter % 10 == 0 && t2Counter % 10 != 0){
+                                monitor.wait();
+                            }
                             if (i > t2Counter) {
+
                                 System.out.println("t1 is ahead with i="+i+", wait for t2Counter="+t2Counter); 
                                 monitor.wait(); 
                             }
                         }
                         if (n == 2) {
+                            if (t2Counter % 10 == 0 && t1Counter % 10 != 0){
+                                monitor.wait();
+                            }
                             if (i > t1Counter) {
-                                System.out.println("t2 is ahead with i="+i+", wait for t1Counter="+t1Counter); 
-                                monitor.wait(); 
+                                System.out.println("t2 is ahead with i="+i+", wait for t1Counter="+t1Counter);
+                                monitor.wait();
                             }
                         }
 
