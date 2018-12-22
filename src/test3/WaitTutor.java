@@ -17,9 +17,10 @@ import org.junit.Test;
 
 public class WaitTutor {
     Thread t1, t2; 
-    Object monitor = new Object(); 
+    Object monitor = new Object();
+    volatile boolean bool = false;
     int runningThreadNumber = 1; 
-    volatile int t1Counter = 0, t2Counter = 0;
+    int t1Counter = 0, t2Counter = 0;
     private Thread counterThread; 
     //int maxCounter = 0; 
 
@@ -78,6 +79,8 @@ public class WaitTutor {
                     } catch (InterruptedException e) {
                         e.printStackTrace(); 
                     }
+
+                    bool = true;
                 }
                 Thread.yield();
             }
@@ -88,7 +91,7 @@ public class WaitTutor {
     public void testThread() {
         t1 = new Thread(new TestThread("t1", 1));
         t2 = new Thread(new TestThread("t2", 2)); 
-        counterThread = new Thread(){
+        counterThread = new Thread(new Runnable() {
 
             @Override
             public void run() {
@@ -99,16 +102,16 @@ public class WaitTutor {
                         if (t1Counter == t2Counter && t1Counter % 10 == 0) {
                             System.err.println("COUNTER " + t1Counter + " = " + t2Counter);
                             try {
-                                monitor.notifyAll();
                                 monitor.wait();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         }
+                        monitor.notifyAll();
                     }
                 }
             }
-        };
+        });
         counterThread.setDaemon(true);
         System.out.println("Starting threads");
         counterThread.start(); 
