@@ -47,7 +47,7 @@ public class WaitTutor {
                                 System.out.println("t1 is ahead with i="+i+", wait for t2Counter="+t2Counter);
                                 monitor.wait();
                             }
-                            if (i == t2Counter.get() && t1Counter.get() % 10 == 0) {
+                            if (t1Counter.get() == t2Counter.get() && t1Counter.get() % 10 == 0) {
                                 monitor.wait();
                             }
                         }
@@ -56,7 +56,7 @@ public class WaitTutor {
                                 System.out.println("t2 is ahead with i="+i+", wait for t1Counter="+t1Counter);
                                 monitor.wait();
                             }
-                            if (i == t1Counter.get() && t2Counter.get() % 10 == 0) {
+                            if (t2Counter.get() == t1Counter.get() && t2Counter.get() % 10 == 0) {
                                 monitor.wait();
                             }
                         }
