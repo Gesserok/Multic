@@ -2,7 +2,8 @@ package test1;
 
 import org.junit.Test;
 
-/* Как остановить поток?
+/**
+        * Как остановить поток?
         *
         * Для того, чтобы прервать поток, мы можем использовать флаг
         * shouldTerminate, который должен проверяться в цикле внутри run().
@@ -13,18 +14,14 @@ import org.junit.Test;
         * т.к. поток t1 ждет второй поток и не может дождаться.
         * Какие есть решения проблемы?
         */
-
-
-
 public class WaitTerminateTutor {
-
     Thread t1, t2;
     Object monitor = new Object();
     int runningThreadNumber = 1;
-
     class TestThread implements Runnable {
+
         String threadName;
-        public boolean shouldTerminate;
+        volatile public boolean shouldTerminate;
 
         public TestThread(String threadName) {
             this.threadName = threadName;
@@ -32,36 +29,36 @@ public class WaitTerminateTutor {
 
         @Override
         public void run() {
-
             for (int i=0;i<100;i++) {
                 System.out.println(threadName+":"+i);
                 synchronized(monitor) {
                     try {
                         while (!threadName.equals("t"+runningThreadNumber)) {
                             System.out.println("wait for thread "+"t"+runningThreadNumber);
-                            monitor.wait();
+                            if (!Thread.currentThread().isInterrupted()) {
+                                monitor.wait();
+                            } else {
+                                return;
+                            }
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
-
                     }
                     runningThreadNumber++;
                     if (runningThreadNumber>2) runningThreadNumber=1;
                     monitor.notifyAll();
                     try {
-                        Thread.sleep(100);
+                            Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     if (shouldTerminate) {
-
                         return;
                     }
                 }
             }
         }
     }
-
 
     @Test
     public void testThread() {
@@ -73,6 +70,30 @@ public class WaitTerminateTutor {
         t1.start();
         t2.start();
 
+
+        Thread monitorThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!testThread1.shouldTerminate && !testThread2.shouldTerminate) {
+                    synchronized (monitor) {
+                        try {
+                            monitor.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                t1.interrupt();
+                t2.interrupt();
+
+//                testThread1.shouldTerminate = true;
+//                testThread2.shouldTerminate = true;
+            }
+        });
+
+        monitorThread.start();
+
         Thread terminator = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -82,6 +103,7 @@ public class WaitTerminateTutor {
                     e.printStackTrace();
                 }
                 testThread2.shouldTerminate=true;
+
             }
         });
         terminator.start();
