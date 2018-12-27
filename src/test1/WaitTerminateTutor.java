@@ -43,6 +43,7 @@ public class WaitTerminateTutor {
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        Thread.currentThread().interrupt();
                     }
                     runningThreadNumber++;
                     if (runningThreadNumber>2) runningThreadNumber=1;
@@ -51,6 +52,7 @@ public class WaitTerminateTutor {
                             Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        Thread.currentThread().interrupt();
                     }
                     if (shouldTerminate) {
                         return;
@@ -115,6 +117,7 @@ public class WaitTerminateTutor {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("Main finished...");
     }
 
 }
